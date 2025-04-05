@@ -1,0 +1,30 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.fft import fft
+
+# Cargar datos simulados
+data = pd.read_csv("waveform.csv")
+t = data['time']
+v = data['voltage']
+
+# Calcular FFT
+N = len(v)
+Vf = fft(v)
+frequencies = np.fft.fftfreq(N, t[1] - t[0])
+magnitude = np.abs(Vf) / N
+
+# Calcular THD
+fundamental = magnitude[np.argmax((frequencies > 59) & (frequencies < 61))]
+harmonics = magnitude[(frequencies > 0) & (frequencies != 60)]
+thd = np.sqrt(np.sum(harmonics**2)) / fundamental
+
+print(f"THD: {thd*100:.2f}%")
+
+# Plot
+plt.plot(frequencies[:N // 2], magnitude[:N // 2])
+plt.xlabel("Frecuencia [Hz]")
+plt.ylabel("Magnitud")
+plt.title("Espectro de frecuencia")
+plt.grid()
+plt.show()
